@@ -78,7 +78,8 @@ You already *can* solve problems. The two things that actually move the needle:
 - [x] 167. Two Sum II - Input Array Is Sorted ✓ — solved 2026-06-24
 - [x] 11. Container With Most Water ✓ — solved 2026-06-24
 - [x] 15. 3Sum ✓ (re-solved) — solved 2026-06-24
-- [x] 88. Merge Sorted Array ✓ — solved 2026-06-28 · fill from the back, two pointers, O(m+n)/O(1)
+- [x] 88. Merge Sorted Array ✓ — solved 2026-06-28, 2026-08-30 · fill from the back — write head `k` never outruns read head `i`, O(m+n)/O(1)
+- [x] 80. Remove Duplicates from Sorted Array II ✓ — solved 2026-08-30 · compare vs `nums[k-2]` (the kept window) — generalizes to "at most m" via `k-m`, O(n)/O(1)
 
 **Heap / Quickselect**
 - [x] 347. Top K Frequent Elements ✓ — solved 2026-06-24 · 3 approaches: size-K heap (N log K) · heapify+pop (N + K log N) · quickselect (N avg)
@@ -567,6 +568,68 @@ edge handling is the whole difficulty; write out a 4-element example by hand fir
 
 - [x] 23. Merge k Sorted Lists ✓ — solved 2026-06-28 · min-heap of list heads, pop smallest, O(N log k)
 - [x] 253. Meeting Rooms II ✓ — solved 2026-05-31 ⚠️ not comfortable — prioritize on review
+- [x] 55. Jump Game ✓ — solved 2026-08-31 · greedy reachability frontier, `max_reach = max(max_reach, i + nums[i])`, fail when `max_reach < i`, O(n)
+- [x] 45. Jump Game II ✓ — solved 2026-08-31 · BFS-by-levels without the queue — `current_end` closes a level, `farthest` opens the next, O(n)
+- [x] 56. Merge Intervals ✓ — solved 2026-09-02 · sort by start, extend with `max` (nested intervals!), `<=` merges touching, O(n log n)
+- [x] 57. Insert Interval ✓ — solved 2026-09-02 · input pre-sorted → 3 phases (before / merge / after); binary-search the two boundaries to make it ~flat
+- [x] 452. Minimum Number of Arrows to Burst Balloons ✓ — solved 2026-09-02 · sort by **end**, shoot at `points[0][1]`, new arrow only when `last_shoot < start` (`<` — touching balloons share an arrow)
+
+#### Pattern Knowledge — Greedy
+
+**When greedy works:** a *local* rule provably gives the global optimum, so you never
+need to store per-index state. The tell: DP would work but the recurrence collapses
+into a single running `max`/`min`.
+
+**1. Reachability frontier (Jump Game, 55)** — carry the farthest index reachable so
+far; if the frontier ever falls behind where you stand, there's an uncrossable gap.
+```python
+max_reach = 0
+for i in range(len(nums)):
+    if max_reach < i:            # CHECK BEFORE UPDATE
+        return False
+    max_reach = max(max_reach, i + nums[i])
+return True
+```
+> Order matters. Update first and a `0` at index `i` extends the frontier from a
+> square you never reached. Backward variant: shrink the target — `if i + nums[i] >=
+> last: last = i`, reachable iff `last == 0`.
+
+**2. Frontier + level counting (Jump Game II, 45)** — same scan, but count *minimum*
+jumps: it's BFS by levels flattened into one pass. Close a level when `i` reaches the
+previous frontier.
+```python
+jumps = cur_end = farthest = 0
+for i in range(len(nums) - 1):        # stop before last — arriving needs no new jump
+    farthest = max(farthest, i + nums[i])
+    if i == cur_end:                  # exhausted this level
+        jumps += 1
+        cur_end = farthest
+return jumps
+```
+
+**3. Running-best scan (Best Time to Buy/Sell Stock, 121)** — keep min-so-far, take
+the best difference against it. Same shape: one accumulator, no table.
+
+**4. Sort, then take greedily (intervals)** — the sort key IS the algorithm, and it
+differs per question:
+
+| Problem | Sort key | Why |
+|---|---|---|
+| 56. Merge Intervals | **start** | build groups left→right; only the right edge matters |
+| 57. Insert Interval | **start** (given sorted) | 3 phases: copy before · merge · copy after |
+| 435. Non-overlapping | **end** | keeping the earliest-ending one leaves the most room |
+| 452. Burst Balloons | **end** | same scan as 435, but touching **shares** an arrow (`s > end`, not `s >= end`) |
+| 253. Meeting Rooms II | **start** + min-heap of ends | sweep the timeline |
+
+> Swapping these genuinely breaks both directions — 56 sorted by end gives
+> `[[0,2],[1,1]] → [[1,2]]`; 435 sorted by start removes 3 instead of 2 on
+> `[[1,100],[11,22],[1,11],[2,12]]`. Two merge traps: extend with **`max`** (a nested
+> interval would shrink the group) and use **`<=`** (touching counts as overlapping —
+> check the problem statement, this is the #1 silent wrong answer).
+
+> **The trap:** greedy fails the moment a locally worse choice can pay off later
+> (Coin Change with arbitrary denominations). If you can't state *why* the local rule
+> is safe, write the DP.
 
 ---
 
