@@ -224,6 +224,30 @@ then multiply by right-products in a second pass. Same "precompute a running agg
 
 - [x] 3. Longest Substring Without Repeating Characters ✓ — solved 2026-05-31 ⚠️ O(N) optimized solution (jump `l` directly via hashmap index, `max(l, cache[s[r]]+1)`) not fully understood — prioritize on review
 - [x] 28. Find the Index of the First Occurrence in a String ✓ — solved 2026-06-24 · brute-force sliding window O(n·m)
+- [x] 796. Rotate String ✓ — solved 2026-10-12 · `goal in s + s`（s+s 含全部 n 个旋转）；朴素 `(i+j)%n` 虚拟旋转是 O(n²) baseline，KMP 才是 O(n)
+
+#### Pattern Knowledge — String Matching
+
+**「某串是另一串的旋转/循环移位」→ 拼接自己。** `s + s` 包含 `s` 的全部 `n` 个旋转
+作为连续子串，所以「是旋转」就退化成「是子串」。别忘了先查长度相等，否则 `"abc"` 和
+`"ab"` 会误判。
+
+**三档写法，按面试要求选：**
+
+| 写法 | 时间 | 什么时候用 |
+|---|---|---|
+| 朴素逐偏移比较 | O(n·m) | 先给一个一定正确的 baseline |
+| `pattern in text` | O(n+m) 典型 | 默认答案，跑在 C 层，实测最快 |
+| KMP | O(n+m) 最坏保证 | 面试官说「不许用内置搜索」时 |
+
+**KMP 的一句话本质：失配时不丢弃已匹配的信息。** `lps[i]` = `pattern[:i+1]` 的最长
+border（既是真前缀又是真后缀）长度；失配就 `k = lps[k-1]` 把**模式指针**滑到那个
+border，**文本指针永不后退** —— 这才是 O(n) 的来源。朴素写法失配后 `j` 重置为 0，
+信息全丢，所以是 O(n·m)。
+
+> **反直觉：Python 里 KMP 往往比 `in` 慢。** 实测对抗输入下 KMP 66.59ms vs `in`
+> 0.44ms —— 理论 O(n) 的优势被解释器开销吃掉，而 `in` 虽然理论最坏 O(n·m) 却是 C
+> 实现。所以 KMP 是「会写」的题，不是「该用」的题。
 
 ---
 
