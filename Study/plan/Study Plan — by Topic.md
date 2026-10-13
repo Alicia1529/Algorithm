@@ -235,7 +235,7 @@ then multiply by right-products in a second pass. Same "precompute a running agg
 
 - [x] 54. Spiral Matrix ✓ — solved 2026-07-05 · peel rings (recursive) / shrink 4 boundaries (iterative); guard bottom+left with `height>1 and width>1`, O(m·n)
 - [x] 48. Rotate Image ✓ — solved 2026-07-05 · transpose + reverse rows (canonical) / ring rotation cycling 4 cells, in-place O(n²)
-- [x] 723. Candy Crush ✓ — solved 2026-07-05 · simulation find→crush→drop loop; collect crush cells in a SET (simultaneous), gravity via write pointer, O((m·n)²)
+- [x] 723. Candy Crush ✓ — solved 2026-07-05, 2026-10-12 · simulation find→crush→drop loop; collect crush cells in a SET (simultaneous), gravity via write pointer, O((m·n)²) · run-length 扫段时 `col = k` 跳过整段，写 `col += 1` 会退化成 O(m·n²)
 
 #### Pattern Knowledge — Matrix
 
