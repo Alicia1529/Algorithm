@@ -260,8 +260,42 @@ border，**文本指针永不后退** —— 这才是 O(n) 的来源。朴素�
 - [x] 54. Spiral Matrix ✓ — solved 2026-07-05 · peel rings (recursive) / shrink 4 boundaries (iterative); guard bottom+left with `height>1 and width>1`, O(m·n)
 - [x] 48. Rotate Image ✓ — solved 2026-07-05 · transpose + reverse rows (canonical) / ring rotation cycling 4 cells, in-place O(n²)
 - [x] 723. Candy Crush ✓ — solved 2026-07-05, 2026-10-12 · simulation find→crush→drop loop; collect crush cells in a SET (simultaneous), gravity via write pointer, O((m·n)²) · run-length 扫段时 `col = k` 跳过整段，写 `col += 1` 会退化成 O(m·n²)
+- [x] 1861. Rotating the Box ✓ — solved 2026-10-13 · 旋转 + 逐列沉降；**有障碍物时必须清空源格子**（`*` 让写指针跳到障碍上方，`last_row <= row` 不变量失效，事后统一填充兜不住 → 石头被复制）
 
 #### Pattern Knowledge — Matrix
+
+**0. 写指针压缩（重力 / 原地重排）** — 一个读指针扫、一个写指针落，是整个
+"原地重排"家族的共同骨架：
+
+```python
+write = <起点>
+for read in <扫描顺序>:
+    if <该保留>:
+        arr[write] = arr[read]
+        write += <步长>
+# 可选：用默认值填充 write 之后的位置
+```
+
+| 题 | 方向 | 保留条件 |
+|---|---|---|
+| 27. Remove Element | 左→右 | `!= val` |
+| 26 / 80. Remove Duplicates | 左→右 | `!= nums[write-1]` / `write-2` |
+| 283. Move Zeroes | 左→右 | `!= 0` |
+| 88. Merge Sorted Array | **右→左** | 取两者较大 |
+| 723. Candy Crush | 下→上（逐列） | `!= 0` |
+| 1861. Rotating the Box | 下→上（逐列） | `== '#'`，遇 `*` 重置 |
+
+> **方向怎么选：从空位那一端开始。** 88 的空位在尾部，所以反向填充；1861 的空位在
+> 底部（重力方向），所以自底向上。
+
+> ⚠️ **有障碍物就必须清空源格子。** 无障碍时（723）写指针单调下降，`last_row <= row`
+> 恒成立，残留全在列顶部，结尾统一补默认值即可。有障碍时（1861）`*` 让写指针跳到
+> 障碍**上方**，一列被切成多个独立区段，残留可能在任意段内部 —— 事后填充覆盖不到，
+> 不清源格子石头会被**复制**。最小反例 `[['*','#','.']]`。
+
+**矩阵旋转能否原地：看形状变不变。** 48 是方阵（转置 + 每行 reverse，原地）；1861 是
+`m×n → n×m`，必须新建矩阵。顺时针 `new[j][m-1-i] = old[i][j]`。
+
 
 **The core patterns (most → least common):**
 
