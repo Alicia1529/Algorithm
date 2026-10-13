@@ -1282,6 +1282,34 @@ def find_itinerary(tickets):
 - [x] 380. Insert Delete GetRandom O(1) ✓ — solved 2026-06-27 · hashmap (val→idx) + array + swap-with-last for O(1) remove
 - [x] 146. LRU Cache ✓ — solved 2026-06-27, 2026-06-28 · hashmap + doubly-linked list w/ dummy head/tail, O(1) get/put
 - [x] 460. LFU Cache ✓ — solved 2026-06-28 · key2val + freq→OrderedDict[key] + minFrequency, O(1) get/put
+- [x] 155. Min Stack ✓ — solved 2026-09-04 · store (value, min-so-far) per element so pop restores the min for free; two-stack variant needs `<=` or duplicate mins break it
+- [x] 348. Design Tic-Tac-Toe ✓ — solved 2026-10-12 · drop the board: one ±1 counter per line (`+1`/`-1`), win when `abs(counter) == n`, O(1) move / O(n) space
+
+#### Pattern Knowledge — Design
+
+**The one question every design problem asks:** *what representation makes every
+required operation O(1)?* You are not optimizing an algorithm, you are choosing
+state. Two moves do most of the work:
+
+**1. Maintain the answer on write, don't recompute it on read.** If a query asks
+"min / max / count / is-this-group-complete", keep that aggregate updated as data
+goes in. 155 stores the min *per stack element*, so `pop` restores the previous min
+with no bookkeeping. 348 keeps one counter per line, so a win check is one integer
+comparison instead of an O(n) scan.
+
+**2. Pair two structures so each covers the other's weakness.** A hashmap gives O(1)
+lookup but no order; an array/list gives order but O(n) search. Combining them is the
+entire trick behind 380 (hashmap `val→idx` + array, swap-with-last to delete), 146
+(hashmap + doubly-linked list) and 460 (hashmap + freq buckets).
+
+**The ±1 encoding** (348) is worth remembering on its own: with exactly **two**
+categories, store `+1` and `-1` and the question "are these all the same?" becomes
+`abs(sum) == count`. Shows up in balanced-parenthesis counters and equal-count
+subarrays via prefix sums.
+
+> **Watch the duplicate/tie case.** It's where design solutions silently break: the
+> two-stack Min Stack must push on `x <= min` (not `<`), or `push(1), push(1), pop()`
+> empties the min-stack while a `1` is still on the main stack.
 
 ---
 
